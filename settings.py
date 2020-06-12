@@ -31,3 +31,4 @@ ASTEROID_MAX_SPEED = 120
 # Game
 DIFFICULTY = 5
 FPS = 30
+FONT_NAME = 'segoeui'

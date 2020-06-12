@@ -11,6 +11,8 @@ class Game:
         self.screen = pg.display.set_mode((WIDTH, HEIGHT))
         pg.display.set_caption(TITLE)
         self.clock = pg.time.Clock()
+        self.font_name = pg.font.match_font(FONT_NAME)
+        print(pg.font.get_fonts())
         self.running = True
 
     def new(self):
@@ -20,6 +22,7 @@ class Game:
         self.asteroids = pg.sprite.Group()
         self.player = Player(self)
         self.score = 0
+
         while len(self.asteroids) < DIFFICULTY:
             self.xrange = list(range(-ASTEROID_MAX_RADIUS,0)) + list(range(WIDTH, ASTEROID_MAX_RADIUS))
             self.yrange = list(range(-ASTEROID_MAX_RADIUS,0)) + list(range(HEIGHT, ASTEROID_MAX_RADIUS))
@@ -76,8 +79,16 @@ class Game:
         # Game Loop - draw
         self.screen.fill(BLACK)
         self.all_sprites.draw(self.screen)
+        self.draw_text('Score: ' + str(self.score), 22, WHITE, WIDTH * 0.05, HEIGHT * 0.05)
         # *after* drawing everything, flip the display
         pg.display.flip()
+
+    def draw_text(self, text, size, color, x, y):
+        font = pg.font.Font(self.font_name, size)
+        text_surface = font.render(text, True, color)
+        text_rect = text_surface.get_rect()
+        text_rect.topleft = (x, y)
+        self.screen.blit(text_surface, text_rect)
 
 g = Game()
 while g.running:
