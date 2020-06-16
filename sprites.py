@@ -33,18 +33,17 @@ class Player(pg.sprite.Sprite):
         pg.draw.line(self.original_image, WHITE, (2, PLAYER_HEIGHT - (PLAYER_HEIGHT * 0.2))
                                                , (PLAYER_WIDTH-2, PLAYER_HEIGHT - (PLAYER_HEIGHT * 0.2)), 2)
         
-    def controller(self):
+    def move(self, action):
         self.rot_speed = 0
         self.acc = vec(0, 0)
         # User input
-        keys = pg.key.get_pressed()
-        if keys[pg.K_LEFT]:
+        if action[0] == 1:
             self.rot_speed = PLAYER_ROT_SPEED
-        if keys[pg.K_RIGHT]:
+        if action[1] == 1:
             self.rot_speed = -PLAYER_ROT_SPEED
-        if keys[pg.K_UP]:
+        if action[2] == 1:
             self.acc = vec(0, -PLAYER_ACC).rotate(-self.rot)
-        if keys[pg.K_SPACE]:
+        if action[3] == 1:
             now = pg.time.get_ticks()
             if now - self.last_shot > BULLET_RATE:
                 self.last_shot = now
@@ -53,7 +52,7 @@ class Player(pg.sprite.Sprite):
                 Bullet(self.game, pos, dir)
          
     def update(self):
-        self.controller()
+        
         # Sprite movement
         self.rot = (self.rot + self.rot_speed * self.game.dt) % 360 
         self.image = pg.transform.rotate(self.original_image, self.rot)
@@ -159,3 +158,31 @@ class Asteroid(pg.sprite.Sprite):
         if self.pos.y + self.size < 0:
             self.pos.y = HEIGHT + self.size
         self.mask = pg.mask.from_surface(self.image)
+
+class LineOfSight(pg.sprite.Sprite):
+    def __init__(self, game, player, rot):
+        # Initiate line of sight sprite
+        self.groups = game.all_sprites, game.lines
+        pg.sprite.Sprite. __init__(self, self.groups)
+        self.player = player
+        self.coll = False
+        self.rot = rot
+        # Draw line
+        self.draw(WHITE)
+
+    def draw(self, color):
+        self.image = pg.Surface((1, LINE_DISTANCE), pg.SRCALPHA)
+        pg.draw.line(self.image, color, (0, 0), (0, LINE_DISTANCE), 2)
+        self.image = pg.transform.rotate(self.image, -self.rot)
+        
+    def update(self):
+        self.rect = self.image.get_rect()
+        self.pos = vec(self.player.rect.centerx, self.player.rect.centery)
+        self.rect.center = self.pos + vec(0, -LINE_DISTANCE / 2).rotate(self.rot)
+        self.mask = pg.mask.from_surface(self.image)
+    
+    def output(self):
+        if self.coll == True:
+            return 1
+        else:
+            return 0
